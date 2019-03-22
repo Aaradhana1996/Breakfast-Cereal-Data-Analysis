@@ -1,0 +1,84 @@
+---
+title: "Project Part 1"
+author: "Aaradhana \"Anya\" Bharill"
+date: "December 8, 2017"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+##Breakfast Cereal Project Part 1
+```{r}
+library(tidyverse)
+cereal <- read_csv("C:/Users/bharila/Desktop/Winter 2017/MA485-Heyman/Project/HealthyBreakfast.csv")
+```
+I am working on the breakfast cereal dataset. It has 77 different breakfast cereals (i.e. 77 observations), with 15 different variables observed for each observation. 
+
+While the site containing the data doesn't provide any information about how it was collected (except for the variable meanings), all the manufacturers listed in the manufacturer category variable are American companies so clearly American company breakfast cereal data was collected. 
+
+The data for all the variables (except for rating) in this dataset, can be collected from the cereal box itself. The fact that there is a shelf variable (counting the shelf number from the floor) means that this data was probably collected from a supermarket. While the shelf variables looks numerical it is actually categorical. The vitamin variable also looks numerical but is categorical as the codebook says that it can have only three values: 0, 25, or 100. 
+
+It is unclear where the data for rating was collected. This could be from customer feedback obtained in that supermarket or from somewhere online.
+
+```{r}
+dim(cereal)   #gives the dimensions (rows, columns) of the dataset
+cereal$vitamins <- as.factor(cereal$vitamins)
+cereal$shelf <- as.factor(cereal$shelf)
+```
+First a summary of the cereal dataset was obtained to get a generaloverview of the data. The `carbo`, `sugars`, and `potass` variables have a minimum value of -1 meaning that there is missing data in tha table. On further looking at the table, there are three observations with missing data. All three cereals are from different manufacturers but 2 are of the type, hot and 1 is of the type, cold. There are only 3 hot cereals in the entire dataset.
+```{r}
+summary(cereal)
+```
+Apart from looking at the summary, I also noticed that the two companies in the dataset manufacture many different cereals whereas the others manufacture a much lower proportion. 
+
+```{r}
+w = table(cereal$mfr)
+t = as.data.frame(w)
+t
+```
+
+Finally I plotted pairwise plots of the main nutrients and rating for each observation. I left out the shelf, vitamin and weight variables because I thought that the vitamin varible was too vague, the shelf variable didn't have much to do with nutrition and weight is like a sum of all the other nutrients in a way.
+
+```{r}
+pairs(~calories+protein+fat+sodium+fiber+carbo+sugars+potass+rating, data=cereal)
+pairs.width = "90%"
+```
+While there are a lot of things that can be noticed in all these pairwise plots (like the clear relationship between fiber and potassium), I think the most important relationships are those between some of the nutrients and the rating since this could give insight into how all of the nutrient content of the breakfast cereal, and some other factors like manufacturer, affect the rating of the cereal. Companies can use this to then make their cereal such that the cereal would get the highest rating as the customers would like it the most, and the company can improve its profits. SO rating is my response variable.  
+
+Some of the most evident relationships between the nutrients and rating is in the calories and sugar. While rating seem to have relationships with fat and protein they are also clumped together and it is not very clear. 
+
+```{r}
+plot(cereal$sugars, cereal$rating, pch=20, main="Sugars in grams per serving vs. Rating for Breakfast Cereals",
+     xlab="Sugars/grams", ylab="Rating")
+```
+```{r}
+plot(cereal$calories, cereal$rating, pch=20, main="Calories per serving vs. Rating for Breakfast Cereals",
+     xlab="Calories", ylab="Rating")
+```
+It sounds reasonable that the number of calories and sugar would affect the rating of the cereal substantially because people who check the nutrient information before eating it are probably trying to minmize calories and sugar. THe data seems ot show a weak negative linear relationship between calories and rating and sugars and rating, supporting this point of view. 
+
+Finally, it seems reasonable to compare the ratings by manufacturers since manufacturers. All the small manufacturers are clumped in the small group whereas since there are two big ones which have the most number of observationsin the dataset as mentioned earlier. 
+
+```{r}
+cereal$mfr[cereal$mfr=="A"] <- "Other"
+cereal$mfr[cereal$mfr=="N"] <- "Other"
+cereal$mfr[cereal$mfr=="P"] <- "Other"
+cereal$mfr[cereal$mfr=="Q"] <- "Other"
+cereal$mfr[cereal$mfr=="R"] <- "Other"
+
+boxplot(cereal$rating~cereal$mfr, main="Manufacture vs. Rating", ylab="Rating", xlab="Manufacturer", cex.main=0.8)
+```
+
+```{r}
+boxplot(cereal$calories~cereal$mfr, main="Calories vs. Rating", xlab="Manufacturer", ylab="Calories", cex.main=0.8)
+```
+
+It seems like the manufacturers with higher ratings have lesser number of calories and that seems reasonable considering our previous evaluations. 
+
+```{r}
+boxplot(cereal$sugars~cereal$mfr, main="Sugar vs. Rating", xlab="Manufacturer", ylab="Sugar/grams", cex.main=0.8)
+```
+It seems like the manufacturers with higher ratings have lesser sugar and that seems reasonable considering our previous evaluations. 
+
+I think my linear model will contain calories and sugar as the predictors and rating as the response variable. 
